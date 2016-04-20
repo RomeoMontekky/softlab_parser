@@ -7,13 +7,20 @@ namespace SoftLab
 class Exception
 {
 public:
-   Exception(const std::string& description, long line_number = -1);
-   
+   Exception(const std::string& description);
    const std::string& GetDescription() const;
-   long GetLineNumber() const;
    
 private:
    std::string m_description;
+};
+
+class SyntaxException : public Exception
+{
+public:
+   SyntaxException(long line_number, const std::string& description);
+   long GetLineNumber() const;
+
+private:
    long m_line_number;
 };
 
@@ -42,7 +49,7 @@ void SyntaxError(long line_number, const Args&... args)
 {
    std::stringstream stream;
    FormatString(stream, args...);
-   throw Exception(stream.str(), line_number);
+   throw SyntaxException(line_number, stream.str());
 }
 
 } // namespace SoftLab

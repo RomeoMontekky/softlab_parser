@@ -21,20 +21,26 @@ int main(int argc, char* argv[])
       parser.Parse(argv[1]);
       parser.SaveTo(argv[2]);
    }
+   catch (const SoftLab::SyntaxException& ex)
+   {
+      std::cerr << "Syntax error at line " << ex.GetLineNumber() <<  ": "
+                << ex.GetDescription() << std::endl;
+      return -1;
+   }
    catch (const SoftLab::Exception& ex)
    {
       std::cerr << "Error: " << ex.GetDescription() << std::endl;
-      return -1;
+      return -2;
    }
    catch (const std::exception& ex)
    {
       std::cerr << "System error: " << ex.what() << std::endl;
-      return -2;
+      return -3;
    }
    catch (...)
    {
-      std::cerr << "Internal error" << std::endl;
-      return -3;
+      std::cerr << "Internal error." << std::endl;
+      return -4;
    }
    
    return 0;
