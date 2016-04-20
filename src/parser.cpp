@@ -1,105 +1,62 @@
 ﻿#include "parser.h"
-#include "exception.h"
+#include "exceptions.h"
+#include "utils.h"
 
 #include <fstream>
 #include <memory>
-#include <cctype>
-#include <cassert>
 
 namespace SoftLab
 {
    
-namespace
+struct Parser::ParsedNode
 {
+   ParsedNode(long id);
+
+   long m_id;
+   std::string m_name;
+   std::string m_value;
+   std::vector<ParsedNode> m_children;
+};
+
+Parser::ParsedNode::ParsedNode(long id) :
+   m_id(id),
+   m_name(),
+   m_value(),
+   m_children()
+{
+}
    
-void SkipSpaces(const char*& curr_char, long& line_number)
+Parser::Parser() : m_root()
 {
-   while (*curr_char != '\0' && std::isspace(*curr_char))
-   {
-      if ('\n' == *curr_char)
-      {
-         ++line_number;
-      }
-      ++curr_char;
-   }
 }
 
-bool GetQualifier(const char*& curr_char, std::string& qualifier)
-{
-   if ('\0' == *curr_char)
-   {
-      return false;
-   }
-
-   const char* start = curr_char;
-
-   // First symbol must be either undersore or alphabetic one.
-   if (!std::isalpha(*curr_char) && *curr_char != '_')
-   {
-      return false;
-   }
-
-   ++curr_char;
-
-   while (*curr_char != '\0' && !std::isspace(*curr_char))
-   {
-      if (!std::isalnum(*curr_char))
-      {
-         return false;
-      }
-      ++curr_char;
-   }
-
-   qualifier.assign(start, curr_char);
-
-   return true;
-}
-
-bool GetQuotedString(const char*& curr_char, std::string& value)
-{
-   assert('"' == *curr_char);
-   ++curr_char;
-
-   const char* start = curr_char;
-
-   while (*curr_char != '\0' && *curr_char != '"')
-   {
-      ++curr_char;
-   }
-
-   if (*curr_char != '"')
-   {
-      return false;
-   }
-
-   value.assign(start, ++curr_char);
-
-   return true;
-}
-
-} // namespace
-   
-Parser::Parser()
+Parser::~Parser()
 {
 }
 
 void Parser::Parse(const char file_name[])
 {
-   std::ifstream file(file_name, std::ios::binary);
-   if (!file.is_open())
+   std::unique_ptr<char[]> file_content;
+
    {
-      Error("Can't open file '", file_name, "' for reading.");
+      std::ifstream file(file_name, std::ios::binary);
+      if (!file.is_open())
+      {
+         Error("Can't open file '", file_name, "' for reading.");
+      }
+
+      file.seekg(0, std::ios::end);
+      const long file_size = file.tellg();
+      file.seekg(0, std::ios::beg);
+
+      file_content = std::make_unique<char[]>(file_size + 1);
+      file.read(file_content.get(), file_size);
+      file_content[file_size] = '\0';
+
+      file.close();
    }
-   
-   file.seekg(0, std::ios::end);
-   const long file_size = file.tellg();
-   file.seekg(0, std::ios::beg);
-   
-   auto file_content = std::make_unique<char[]>(file_size + 1);
-   file.read(file_content.get(), file_size);
-   file_content[file_size] = '\0';
-   
-   file.close();
+
+   m_root = std::make_unique<ParsedNode>(-1);
    
    long line_number = 1;
    long nesting_level = 0;
@@ -108,12 +65,12 @@ void Parser::Parse(const char file_name[])
 
    std::vector<ParsedNode*> nodes_stack;
 
-   ParsedNode* curr_parent = &m_root;
+   ParsedNode* curr_parent = m_root.get();
    ParsedNode* curr_node = nullptr;
    
    do
    {
-      curr_parent->m_children.emplace_back();
+      curr_parent->m_children.emplace_back(0);
       curr_node = &curr_parent->m_children.back();
 
       SkipSpaces(curr_char, line_number);

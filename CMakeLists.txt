@@ -5,14 +5,16 @@ project(softlab_parser)
 set(BINARY_NAME "softlab_parser")
 
 set(CPP_FILES
-   "./src/exception.cpp"
+   "./src/exceptions.cpp"
    "./src/main.cpp"
    "./src/parser.cpp"
+   "./src/utils.cpp"
 )
 
 set(HEADER_FILES
-   "./src/exception.h"
+   "./src/exceptions.h"
    "./src/parser.h"
+   "./src/utils.h"
 )
 
 add_executable(${BINARY_NAME} ${CPP_FILES} ${HEADER_FILES})
