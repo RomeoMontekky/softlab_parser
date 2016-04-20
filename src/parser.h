@@ -11,11 +11,6 @@ public:
    Parser();
    ~Parser();
 
-   Parser(const Parser& rhs) = delete;
-   Parser(Parser&& rhs) = delete;
-   Parser& operator =(const Parser& rhs) = delete;
-   Parser& operator =(Parser&& rhs) = delete;
-
    void Parse(const char file_name[]);
    void SaveTo(const char file_name[]);
    
