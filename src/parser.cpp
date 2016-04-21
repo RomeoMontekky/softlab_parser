@@ -60,9 +60,8 @@ void Parser::Parse(const char file_name[])
    m_root = std::make_unique<ParsedNode>(-1);
    m_root->children = std::make_unique<std::vector<ParsedNode>>();
    
-   long line_number = 1;
-   const char* token_start = nullptr;
    const char* curr_char = file_content.get();
+   long line_number = 1;
 
    std::vector<ParsedNode*> nodes_stack;
    nodes_stack.reserve(20); // empirical value
