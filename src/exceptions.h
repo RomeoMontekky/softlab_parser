@@ -8,6 +8,8 @@ class Exception
 {
 public:
    Exception(const std::string& description);
+   Exception(const char description[]);
+
    const std::string& GetDescription() const;
    
 private:
@@ -18,6 +20,8 @@ class SyntaxException : public Exception
 {
 public:
    SyntaxException(long line_number, const std::string& description);
+   SyntaxException(long line_number, const char description[]);
+
    long GetLineNumber() const;
 
 private:
@@ -44,12 +48,6 @@ void Error(const Args&... args)
    throw Exception(stream.str());
 }
 
-template <typename ...Args>
-void SyntaxError(long line_number, const Args&... args)
-{
-   std::stringstream stream;
-   FormatString(stream, args...);
-   throw SyntaxException(line_number, stream.str());
-}
+void SyntaxError(long line_number, const char description[]);
 
 } // namespace SoftLab

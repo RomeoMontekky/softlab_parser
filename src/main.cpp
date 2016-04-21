@@ -9,15 +9,13 @@ int main(int argc, char* argv[])
    if (argc != 3)
    {
       std::cout << "SoftLab Parser utility. Copyright (c) 2016 Roman Lapitsky." << std::endl
-                << "Usage: " << std::endl
-                << "   softlab_parser.exe <INPUT_FILE> <OUTPUT_FILE>" << std::endl;
+                << "Usage: softlab_parser.exe <INPUT_FILE> <OUTPUT_FILE>" << std::endl;
       return 0;
    }
 
    try
    {   
       SoftLab::Parser parser;
-      
       parser.Parse(argv[1]);
       parser.SaveTo(argv[2]);
    }

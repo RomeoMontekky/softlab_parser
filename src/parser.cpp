@@ -3,6 +3,7 @@
 #include "id_generator.h"
 #include "utils.h"
 
+#include <sstream>
 #include <fstream>
 #include <memory>
 #include <iomanip>
@@ -136,15 +137,31 @@ void Parser::Parse(const char file_name[])
 
 namespace
 {
+
+const int g_width_id = 10;
+const int g_width_parent = 10;
+const int g_width_name = 23;
+const int g_width_value = 23;
+
+std::string GenerateHeader()
+{
+   std::stringstream stream;
+   stream << "| " <<
+      std::setw(g_width_id) << "ID" <<  " | " <<
+      std::setw(g_width_parent) << "Parent ID" <<  " | " <<
+      std::setw(g_width_name) << "Name" <<  " | " <<
+      std::setw(g_width_value) << "Value" <<  " |";
+   return stream.str();
+}
    
 void SaveToImpl(std::ofstream& file, const Parser::ParsedNode& node, long parent_id)
 {
    file << "| " << 
-      std::setw(8)  <<  node.id <<  " | " <<
-      std::setw(8)  <<  parent_id << " | " <<
-      std::setw(20) <<  node.name.get() << " | " <<
-      std::setw(20) << (node.value.get() != nullptr ? node.value.get() : "") << 
-          " |" << std::endl;
+      std::setw(g_width_id)      << node.id <<  " | " <<
+      std::setw(g_width_parent)  << parent_id << " | " <<
+      std::setw(g_width_name)    << node.name.get() << " | " <<
+      std::setw(g_width_value)   <<
+     (node.value.get() != nullptr ? node.value.get() : "") << " |" << std::endl;
    
    if (node.children.get() != nullptr)
    {
@@ -169,12 +186,12 @@ void Parser::SaveTo(const char file_name[])
       Error("Can't open file '", file_name, "' for writing.");
    }
    
-   const std::string header = 
-         "|       Id |   Par.Id |                 Name |                Value |";
+   const std::string header = GenerateHeader();
    const std::string horizontal_line(header.size(), '-');
    
    file << horizontal_line << std::endl;
    file << header << std::endl;
+   file << horizontal_line << std::endl;
    file << horizontal_line << std::endl;
 
    for (const auto& child : *m_root->children)

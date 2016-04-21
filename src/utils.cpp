@@ -50,6 +50,7 @@ bool GetQualifier(const char*& curr_char, std::unique_ptr<char[]>& value)
 
    value = std::make_unique<char[]>(curr_char - start + 1);
    std::strncpy(value.get(), start, curr_char - start);
+   value[curr_char - start] = '\0';
 
    return true;
 }
@@ -72,7 +73,8 @@ bool GetQuotedString(const char*& curr_char, std::unique_ptr<char[]>& value)
 
    value = std::make_unique<char[]>(curr_char - start + 1);
    std::strncpy(value.get(), start, curr_char - start);
-   
+   value[curr_char - start] = '\0';
+
    ++curr_char;
 
    return true;
