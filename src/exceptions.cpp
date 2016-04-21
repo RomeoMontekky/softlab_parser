@@ -14,8 +14,8 @@ const std::string& Exception::GetDescription() const
 }
 
 SyntaxException::SyntaxException(
-      long line_number, const std::string& description) :
-   Exception(description), m_line_number(line_number)
+   long line_number, const std::string& description) :
+      Exception(description), m_line_number(line_number)
 {
 }
 

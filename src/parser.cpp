@@ -10,19 +10,16 @@ namespace SoftLab
    
 struct Parser::ParsedNode
 {
-   ParsedNode(long id);
+   ParsedNode(long input_id);
 
-   long m_id;
-   std::string m_name;
-   std::string m_value;
-   std::vector<ParsedNode> m_children;
+   long id;
+   std::unique_ptr<char[]> name;
+   std::unique_ptr<char[]> value;
+   std::unique_ptr<std::vector<ParsedNode>> children;
 };
 
-Parser::ParsedNode::ParsedNode(long id) :
-   m_id(id),
-   m_name(),
-   m_value(),
-   m_children()
+Parser::ParsedNode::ParsedNode(long input_id) :
+   id(input_id), name(), value(), children()
 {
 }
    
@@ -57,9 +54,9 @@ void Parser::Parse(const char file_name[])
    }
 
    m_root = std::make_unique<ParsedNode>(-1);
+   m_root->children = std::make_unique<std::vector<ParsedNode>>();
    
    long line_number = 1;
-   long nesting_level = 0;
    const char* token_start = nullptr;
    const char* curr_char = file_content.get();
 
@@ -70,8 +67,8 @@ void Parser::Parse(const char file_name[])
    
    do
    {
-      curr_parent->m_children.emplace_back(0);
-      curr_node = &curr_parent->m_children.back();
+      curr_parent->children->emplace_back(0);
+      curr_node = &curr_parent->children->back();
 
       SkipSpaces(curr_char, line_number);
       if ('\0' == *curr_char)
@@ -79,7 +76,7 @@ void Parser::Parse(const char file_name[])
          SyntaxError(line_number, "Node name is expected.");
       }
       
-      if (!GetQualifier(curr_char, curr_node->m_name))
+      if (!GetQualifier(curr_char, curr_node->name))
       {
          SyntaxError(line_number, "Node name must be a qualifier.");
       }
@@ -95,12 +92,13 @@ void Parser::Parse(const char file_name[])
       {
          ++curr_char;
          nodes_stack.push_back(curr_parent);
+         curr_node->children = std::make_unique<std::vector<ParsedNode>>();
          curr_parent = curr_node;
          continue;
       }
       else if ('"' == *curr_char)
       {
-         if (!GetQuotedString(curr_char, curr_node->m_value))
+         if (!GetQuotedString(curr_char, curr_node->value))
          {
             SyntaxError(line_number, "No closing quote at the line.");
          }

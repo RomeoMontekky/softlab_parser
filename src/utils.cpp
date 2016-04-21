@@ -1,5 +1,6 @@
 ﻿#include "utils.h"
 
+#include <cstring>
 #include <cctype>
 #include <cassert>
 
@@ -18,8 +19,10 @@ void SkipSpaces(const char*& curr_char, long& line_number)
    }
 }
 
-bool GetQualifier(const char*& curr_char, std::string& value)
+bool GetQualifier(const char*& curr_char, std::unique_ptr<char[]>& value)
 {
+   value.reset();
+   
    if ('\0' == *curr_char)
    {
       return false;
@@ -35,6 +38,7 @@ bool GetQualifier(const char*& curr_char, std::string& value)
 
    ++curr_char;
 
+   // Other symbols must be all alphanumeric.
    while (*curr_char != '\0' && !std::isspace(*curr_char))
    {
       if (!std::isalnum(*curr_char))
@@ -44,18 +48,18 @@ bool GetQualifier(const char*& curr_char, std::string& value)
       ++curr_char;
    }
 
-   value.assign(start, curr_char);
+   value = std::make_unique<char[]>(curr_char - start + 1);
+   std::strncpy(value.get(), start, curr_char - start);
 
    return true;
 }
 
-bool GetQuotedString(const char*& curr_char, std::string& value)
+bool GetQuotedString(const char*& curr_char, std::unique_ptr<char[]>& value)
 {
    assert('"' == *curr_char);
-   ++curr_char;
-
-   const char* start = curr_char;
-
+   value.reset();
+   
+   const char* start = ++curr_char;
    while (*curr_char != '\0' && *curr_char != '"')
    {
       ++curr_char;
@@ -66,7 +70,10 @@ bool GetQuotedString(const char*& curr_char, std::string& value)
       return false;
    }
 
-   value.assign(start, ++curr_char);
+   value = std::make_unique<char[]>(curr_char - start + 1);
+   std::strncpy(value.get(), start, curr_char - start);
+   
+   ++curr_char;
 
    return true;
 }
