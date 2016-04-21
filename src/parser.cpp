@@ -1,9 +1,11 @@
 ﻿#include "parser.h"
 #include "exceptions.h"
+#include "id_generator.h"
 #include "utils.h"
 
 #include <fstream>
 #include <memory>
+#include <iomanip>
 
 namespace SoftLab
 {
@@ -46,6 +48,7 @@ void Parser::Parse(const char file_name[])
       const long file_size = file.tellg();
       file.seekg(0, std::ios::beg);
 
+      // Read the whole file at once to optimize HD access.
       file_content = std::make_unique<char[]>(file_size + 1);
       file.read(file_content.get(), file_size);
       file_content[file_size] = '\0';
@@ -61,13 +64,16 @@ void Parser::Parse(const char file_name[])
    const char* curr_char = file_content.get();
 
    std::vector<ParsedNode*> nodes_stack;
+   nodes_stack.reserve(20); // empirical value
 
    ParsedNode* curr_parent = m_root.get();
    ParsedNode* curr_node = nullptr;
    
+   IDGenerator generator;
+   
    do
    {
-      curr_parent->children->emplace_back(0);
+      curr_parent->children->emplace_back(generator.Next());
       curr_node = &curr_parent->children->back();
 
       SkipSpaces(curr_char, line_number);
@@ -121,10 +127,62 @@ void Parser::Parse(const char file_name[])
       }
    }
    while (*curr_char != '\0');
+   
+   if (!nodes_stack.empty())
+   {
+      SyntaxError(line_number, "Closing brace is missing.");
+   }
 }
+
+namespace
+{
+   
+void SaveToImpl(std::ofstream& file, const Parser::ParsedNode& node, long parent_id)
+{
+   file << "| " << 
+      std::setw(8)  <<  node.id <<  " | " <<
+      std::setw(8)  <<  parent_id << " | " <<
+      std::setw(20) <<  node.name.get() << " | " <<
+      std::setw(20) << (node.value.get() != nullptr ? node.value.get() : "") << 
+          " |" << std::endl;
+   
+   if (node.children.get() != nullptr)
+   {
+      for (const auto& child : *node.children)
+      {
+         SaveToImpl(file, child, node.id);
+      }
+   }
+}
+
+} // namespace
 
 void Parser::SaveTo(const char file_name[])
 {
+   // In real comercial product writing to the file must be buffered,
+   // but, as this is just a traning task only, let's keep it as is, 
+   // relying on buffering that OS does.
+   
+   std::ofstream file(file_name);
+   if (!file.is_open())
+   {
+      Error("Can't open file '", file_name, "' for writing.");
+   }
+   
+   const std::string header = 
+         "|       Id |   Par.Id |                 Name |                Value |";
+   const std::string horizontal_line(header.size(), '-');
+   
+   file << horizontal_line << std::endl;
+   file << header << std::endl;
+   file << horizontal_line << std::endl;
+
+   for (const auto& child : *m_root->children)
+   {
+      SaveToImpl(file, child, m_root->id);
+   }
+   
+   file << horizontal_line << std::endl;
 }
    
 } // namespace SoftLab

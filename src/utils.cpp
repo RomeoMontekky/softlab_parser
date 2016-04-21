@@ -60,7 +60,7 @@ bool GetQuotedString(const char*& curr_char, std::unique_ptr<char[]>& value)
    value.reset();
    
    const char* start = ++curr_char;
-   while (*curr_char != '\0' && *curr_char != '"')
+   while (*curr_char != '\0' && *curr_char != '"' && *curr_char != '\n')
    {
       ++curr_char;
    }

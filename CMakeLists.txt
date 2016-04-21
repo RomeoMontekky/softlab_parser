@@ -6,6 +6,7 @@ set(BINARY_NAME "softlab_parser")
 
 set(CPP_FILES
    "./src/exceptions.cpp"
+   "./src/id_generator.cpp"
    "./src/main.cpp"
    "./src/parser.cpp"
    "./src/utils.cpp"
@@ -13,6 +14,7 @@ set(CPP_FILES
 
 set(HEADER_FILES
    "./src/exceptions.h"
+   "./src/id_generator.h"
    "./src/parser.h"
    "./src/utils.h"
 )
