@@ -199,6 +199,8 @@ void Parser::SaveTo(const char file_name[])
    }
    
    file << horizontal_line << std::endl;
+
+   file.close();
 }
    
 } // namespace SoftLab
