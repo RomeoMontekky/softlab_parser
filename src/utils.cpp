@@ -30,7 +30,7 @@ bool GetQualifier(const char*& curr_char, std::unique_ptr<char[]>& value)
 
    const char* start = curr_char;
 
-   // First symbol must be either undersore or alphabetic one.
+   // First symbol must be either underscore or alphabetic one.
    if (*curr_char != '_' && !std::isalpha(*curr_char))
    {
       return false;
@@ -38,7 +38,7 @@ bool GetQualifier(const char*& curr_char, std::unique_ptr<char[]>& value)
 
    ++curr_char;
 
-   // Other symbols must be either underscor or alphanumeric ones.
+   // Other symbols must be either underscore or alphanumeric ones.
    while (*curr_char != '\0' && !std::isspace(*curr_char))
    {
       if (*curr_char != '_' && !std::isalnum(*curr_char))
